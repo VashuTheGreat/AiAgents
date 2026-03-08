@@ -12,7 +12,5 @@ class State(TypedDict):
     llm_response: str
     k: int
     queries: List[str]
-    retreiver: Any
     retreiver_responses: List[Any]
-    retreiver_response: Any
     summary: str

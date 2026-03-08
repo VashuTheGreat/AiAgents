@@ -1,6 +1,7 @@
 
 CHAT_PROMPT = """
 You are a helpful assistant. Please answer the user questions.
+Strictly answer in the markdown code
 
 """
 

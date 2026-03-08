@@ -1,7 +1,6 @@
 import os
 
 from langchain_chroma import Chroma
-from langchain_community.document_loaders import DirectoryLoader, UnstructuredFileLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 # from langchain_ollama import OllamaEmbeddings
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -18,7 +17,7 @@ embedding_model = HuggingFaceEmbeddings(model=EMBEDDING_MODEL)
 
 @asyncHandler
 async def document_fetcher(docs: str = "data"):
-    """Fetch all files documents from docs folder"""
+    """Fetch all documents from the docs folder. Supports .txt and .pdf files."""
     logging.info(f"Fetching docs from {docs}")
 
     if not os.path.exists(docs):
@@ -28,41 +27,38 @@ async def document_fetcher(docs: str = "data"):
     logging.info("Scanning for files in ingestion pipeline...")
     files = os.listdir(docs)
     logging.info(f"Files found: {files}")
-    
-    file_types = [file.split(".")[-1] for file in files]
-    unsupported = [f for f, t in zip(files, file_types) if t not in EXCEPTED_FILE_TYPE]
-    if unsupported:
-        logging.warning(f"Found unsupported file types: {unsupported}")
-    
-    # Simple TextLoader fallback for txt files to avoid unstructured complexity if not needed
+
+    from langchain_community.document_loaders import TextLoader, PyPDFLoader
+
     documents = []
-    from langchain_community.document_loaders import TextLoader
-    
     for file in files:
-        if file.endswith('.txt'):
-            file_path = os.path.join(docs, file)
-            logging.info(f"Loading text file: {file_path}")
-            try:
-                loader = TextLoader(file_path, encoding='utf-8')
+        file_path = os.path.join(docs, file)
+        ext = file.split(".")[-1].lower()
+
+        try:
+            if ext == "txt":
+                logging.info(f"Loading TXT file: {file_path}")
+                loader = TextLoader(file_path, encoding="utf-8")
                 documents.extend(loader.load())
-            except Exception as e:
-                logging.error(f"Failed to load {file_path}: {e}")
-        else:
-            logging.info(f"Skipping non-txt file: {file}")
+
+            elif ext == "pdf":
+                logging.info(f"Loading PDF file: {file_path}")
+                loader = PyPDFLoader(file_path)
+                documents.extend(loader.load())
+
+            else:
+                logging.warning(f"Unsupported file type, skipping: {file}")
+
+        except Exception as e:
+            logging.error(f"Failed to load {file_path}: {e}")
 
     if not documents:
-        logging.warning("No documents loaded by TextLoader, trying DirectoryLoader...")
-        loader = DirectoryLoader(
-            path=docs,
-            glob="**/*",
-            loader_cls=UnstructuredFileLoader,
-            loader_kwargs={"encoding": "utf-8"},
-            show_progress=True,
-        )
-        documents = loader.load()
-    
-    logging.info(f"Successfully loaded {len(documents)} documents.")
+        logging.warning("No documents were loaded from the docs folder.")
+    else:
+        logging.info(f"Successfully loaded {len(documents)} document pages.")
+
     return documents
+
 
 
 # ---------------- Chunking ----------------

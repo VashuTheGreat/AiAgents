@@ -1,0 +1,147 @@
+<!-- templates/chat.html -->
+{% extends "base.html" %} {% block title %}Chat MultiGraph – AIAgents{% endblock
+%} {% block styles %}
+<link rel="stylesheet" href="/static/chat.css" />
+{% endblock %} {% block content %}
+<div class="chat-layout" id="chatLayout">
+  <!-- Sidebar -->
+  <aside class="chat-sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Chat MultiGraph</h2>
+      <p class="sidebar-sub">RAG-powered multi-turn agent</p>
+    </div>
+
+    <!-- Connection Status -->
+    <div class="connection-panel" id="connectionPanel">
+      <div class="status-indicator disconnected" id="statusIndicator">
+        <span class="status-dot"></span>
+        <span id="statusText">Disconnected</span>
+      </div>
+      <button
+        class="btn-connect"
+        id="btnConnect"
+        onclick="initiateConnection()"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+        >
+          <path d="M5 12h14M12 5l7 7-7 7" />
+        </svg>
+        Initiate Connection
+      </button>
+    </div>
+
+    <!-- Upload Panel -->
+    <div class="upload-panel" id="uploadPanel" style="display: none">
+      <p class="upload-label">Upload Context Document</p>
+      <p class="upload-hint">One file per session (PDF or TXT)</p>
+      <label class="upload-zone" id="uploadZone">
+        <input
+          type="file"
+          id="fileInput"
+          accept=".pdf,.txt"
+          style="display: none"
+          onchange="handleFileUpload(event)"
+        />
+        <svg
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <polyline points="16 16 12 12 8 16" />
+          <line x1="12" y1="12" x2="12" y2="21" />
+          <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
+        </svg>
+        <span id="uploadLabel">Click or drag to upload</span>
+      </label>
+      <div class="upload-status" id="uploadStatus"></div>
+    </div>
+
+    <!-- Session Info -->
+    <div class="session-info" id="sessionInfo" style="display: none">
+      <p class="session-label">Session ID</p>
+      <p class="session-id" id="sessionIdDisplay">—</p>
+      <button class="btn-reset" onclick="resetSession()">New Session</button>
+    </div>
+  </aside>
+
+  <!-- Chat Area -->
+  <main class="chat-main">
+    <!-- Disconnected Overlay -->
+    <div class="chat-overlay" id="chatOverlay">
+      <div class="overlay-card">
+        <div class="overlay-icon">
+          <svg
+            width="40"
+            height="40"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <path
+              d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+            />
+            <path
+              d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+            />
+          </svg>
+        </div>
+        <h3>Start Your Session</h3>
+        <p>
+          Click <strong>"Initiate Connection"</strong> in the sidebar to
+          generate a unique session and begin chatting with the RAG agent.
+        </p>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="messages-container" id="messagesContainer"></div>
+
+    <!-- Input -->
+    <div class="input-area" id="inputArea">
+      <div class="input-wrapper">
+        <textarea
+          id="messageInput"
+          placeholder="Ask anything about your document..."
+          rows="1"
+          onkeydown="handleKeyDown(event)"
+          oninput="autoResize(this)"
+          disabled
+        ></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <line x1="22" y1="2" x2="11" y2="13" />
+            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+          </svg>
+        </button>
+      </div>
+      <p class="input-hint">
+        Press <kbd>Enter</kbd> to send, <kbd>Shift+Enter</kbd> for new line
+      </p>
+    </div>
+  </main>
+</div>
+{% endblock %} {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+  // Configure marked for safe rendering
+  marked.setOptions({ breaks: true, gfm: true });
+</script>
+<script src="/static/chat.js"></script>
+{% endblock %}

@@ -1,0 +1,141 @@
+<!-- templates/home.html -->
+{% extends "base.html" %} {% block title %}AIAgents - AI-Powered Multi-Agent
+Platform{% endblock %} {% block styles %}
+<link rel="stylesheet" href="/static/home.css" />
+{% endblock %} {% block content %}
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      AI Agent Platform • v1.0
+    </div>
+    <h1 class="hero-title">
+      The Future of<br />
+      <span class="gradient-text">Intelligent Agents</span>
+    </h1>
+    <p class="hero-sub">
+      Build, deploy, and interact with powerful AI agents. Currently featuring a
+      RAG-powered multi-turn chat agent — your intelligent document companion.
+    </p>
+    <div class="hero-actions">
+      <a href="#features" class="btn-premium">Explore Features</a>
+      <a href="/chat" class="btn-outline">Launch Agent →</a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="orbit-ring ring-1"></div>
+    <div class="orbit-ring ring-2"></div>
+    <div class="orbit-ring ring-3"></div>
+    <div class="core-node">
+      <span>AI</span>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="features" id="features">
+  <div class="section-header">
+    <h2>Available Agents</h2>
+    <p>Powerful capabilities, accessible through a seamless interface.</p>
+  </div>
+  <div class="features-grid">
+    <!-- RAG Chat Agent Card -->
+    <a href="/chat" class="feature-card featured">
+      <div class="card-badge">Available Now</div>
+      <div class="card-icon">
+        <svg
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+          />
+        </svg>
+      </div>
+      <h3>Chat MultiGraph</h3>
+      <p>
+        A context-aware RAG agent with multi-turn memory. Upload a document (PDF
+        or TXT) and have natural, intelligent conversations about its content.
+      </p>
+      <div class="card-tags">
+        <span>RAG</span>
+        <span>LangGraph</span>
+        <span>Memory</span>
+      </div>
+      <div class="card-cta">Start Chatting →</div>
+    </a>
+
+    <!-- Coming Soon Card 1 -->
+    <div class="feature-card coming-soon">
+      <div class="card-badge">Coming Soon</div>
+      <div class="card-icon muted">
+        <svg
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+      </div>
+      <h3>Web Research Agent</h3>
+      <p>
+        Autonomously browse the web, gather intelligence, and synthesize answers
+        from live data sources.
+      </p>
+      <div class="card-tags">
+        <span>Agentic</span>
+        <span>Search</span>
+      </div>
+    </div>
+
+    <!-- Coming Soon Card 2 -->
+    <div class="feature-card coming-soon">
+      <div class="card-badge">Coming Soon</div>
+      <div class="card-icon muted">
+        <svg
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polyline points="16 18 22 12 16 6" />
+          <polyline points="8 6 2 12 8 18" />
+        </svg>
+      </div>
+      <h3>Code Agent</h3>
+      <p>
+        An autonomous coding agent that writes, debugs, and explains code across
+        multiple languages.
+      </p>
+      <div class="card-tags">
+        <span>Code</span>
+        <span>Autonomous</span>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %} {% block scripts %}
+<script>
+  // Smooth scroll for hero CTA
+  document
+    .querySelector('a[href="#features"]')
+    .addEventListener("click", function (e) {
+      e.preventDefault();
+      document
+        .getElementById("features")
+        .scrollIntoView({ behavior: "smooth" });
+    });
+</script>
+{% endblock %}

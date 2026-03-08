@@ -29,3 +29,23 @@ png_data = graph.get_graph().draw_mermaid_png()
 with open("graph.png", "wb") as f:
     f.write(png_data)
 logging.info("Graph compiled successfully.")
+
+
+
+
+## ----------- Delete Conversion -----------------
+async def deleteThread(thread_id: str):
+    try:
+        cp = memory
+        # Check if thread exists first
+        state = await cp.aget_tuple(config={'configurable': {'thread_id': thread_id}})
+        if state is None:
+            logging.info(f"Thread {thread_id} not found, nothing to delete.")
+            return False
+            
+        await cp.adelete_thread(thread_id=thread_id)
+        logging.info(f"Thread {thread_id} deleted successfully.")
+        return True
+    except Exception as e:
+        logging.error(f"Error deleting thread {thread_id}: {e}")
+        return False

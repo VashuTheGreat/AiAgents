@@ -1,30 +1,21 @@
-import asyncio
-import logging
-import src.logger
-from src.graph.builder import graph
+import uvicorn as uv
+from api.main import app
+from src.logger import *
+from dotenv import load_dotenv
+from fastapi.staticfiles import StaticFiles
+from src.constants import DATA_FOLDER_PATH,DB_FOLDER_PATH
+import os
+load_dotenv()
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
-async def run_agent():
-    logging.info("Starting AIAgents application...")
-    # Sample initial state for testing
-    config = {"configurable": {"thread_id": "2"}}
-    initial_state = {
-        "userQuery": "Google ka IPO kis year me hua tha?",
-        "db_path": "db/vansh",
-        "docs_path": "data/vansh",
-        "k": 3
-    }
-    try:
-        response = await graph.ainvoke(initial_state,config=config)
-        logging.debug(f"Graph response: {response}")
-        logging.info("Graph invocation successful.")
-        print("\n--- FINAL LLM RESPONSE ---\n")
-        print(response.get("llm_response", "No response found."))
-        print("\n--------------------------\n")
-    except Exception as e:
-        logging.error(f"Application failed: {e}")
-        import traceback
-        logging.error(traceback.format_exc())
-    logging.info("AIAgents application finished.")
+os.makedirs(DATA_FOLDER_PATH, exist_ok=True)
+os.makedirs(DB_FOLDER_PATH, exist_ok=True)
 
-if __name__=="__main__":
-    asyncio.run(run_agent())
+if __name__ == "__main__":
+    uv.run(
+        "main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=False,
+        reload_excludes=["db/*", "data/*", "logs/*", "vector_db/*", ".venv/*"],
+    )
