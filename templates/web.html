@@ -1,0 +1,70 @@
+{% extends "base.html" %} {% block title %}Web Summarizer – AIAgents{% endblock
+%} {% block styles %}
+<link rel="stylesheet" href="/static/web.css" />
+{% endblock %} {% block content %}
+<div class="web-layout">
+  <div class="header-section">
+    <h2>Web Page Summarizer</h2>
+    <p>Enter any URL to get an AI-generated summary of its content.</p>
+  </div>
+
+  <div class="input-section">
+    <div class="input-wrapper">
+      <input
+        type="url"
+        id="urlInput"
+        placeholder="https://example.com/article"
+        required
+        onkeydown="handleKeyDown(event)"
+      />
+      <button class="btn-summarize" id="summarizeBtn" onclick="summarizeWeb()">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+        >
+          <path d="M5 12h14M12 5l7 7-7 7" />
+        </svg>
+        <span>Summarize</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="result-section" id="resultSection" style="display: none">
+    <div class="loading-state" id="loadingState">
+      <div class="spinner"></div>
+      <p>Analyzing and summarizing content...</p>
+    </div>
+
+    <div class="result-content" id="resultContent" style="display: none">
+      <h3>Summary</h3>
+      <div id="summaryText" class="markdown-body"></div>
+    </div>
+
+    <div class="error-state" id="errorState" style="display: none">
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <p id="errorText">Failed to summarize the URL.</p>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+  marked.setOptions({ breaks: true, gfm: true });
+</script>
+<script src="/static/web.js"></script>
+{% endblock %}

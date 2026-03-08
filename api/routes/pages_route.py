@@ -20,3 +20,10 @@ async def chat_model(request: Request):
         context={"request": request}
     )
 
+@router.get("/web")
+async def web_page(request: Request):
+    return templates.TemplateResponse(
+        name="web.html",
+        context={"request": request}
+    )
+
