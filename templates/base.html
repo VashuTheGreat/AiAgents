@@ -42,6 +42,11 @@
           class="{% if request.url.path == '/web' %}active{% endif %}"
           >Web Summarizer</a
         >
+        <a
+          href="/blog"
+          class="{% if request.url.path == '/blog' %}active{% endif %}"
+          >Blog Agent</a
+        >
       </nav>
       {% endblock navbar %}
     </header>
@@ -55,6 +60,12 @@
       </p>
       {% endblock footer %}
     </footer>
+
+    <!-- Inject server-side API key as JS global for all pages -->
+    <script>
+      window.APP_USER_ID = "{{ app_user_id }}";
+    </script>
+    <script src="/static/constants.js"></script>
 
     <!-- Page Specific Scripts -->
     {% block scripts %}{% endblock scripts %}

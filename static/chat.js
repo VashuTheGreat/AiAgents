@@ -1,10 +1,10 @@
 // static/chat.js
+// Requires: constants.js (loaded by base.html before this script)
 
 // =====================================================
 // SESSION MANAGEMENT
 // =====================================================
 
-let userId = null;
 let uploadedFile = false;
 let isConnected = false;
 
@@ -16,10 +16,6 @@ function initiateConnection() {
     const btn = document.getElementById('btnConnect');
     btn.classList.add('loading');
     btn.disabled = true;
-
-    // Generate a UUID v4
-    userId = crypto.randomUUID();
-    sessionStorage.setItem('agentUserId', userId);
 
     // Simulate a brief connection delay for UX
     setTimeout(() => {
@@ -58,7 +54,6 @@ function setConnectedState() {
  * Resets the session – clears storage and reloads the page.
  */
 function resetSession() {
-    sessionStorage.removeItem('agentUserId');
     location.reload();
 }
 
@@ -98,9 +93,9 @@ async function handleFileUpload(event) {
     formData.append('file', file);
 
     try {
-        const res = await fetch('/uploader/post_content', {
+        const res = await fetch(ROUTES.UPLOAD_FILE, {
             method: 'POST',
-            headers: { 'user_id': userId },
+            headers: { 'user_id': getUserId() },
             body: formData
         });
 
@@ -238,12 +233,9 @@ async function sendMessage() {
     showTypingIndicator();
 
     try {
-        const res = await fetch(`/chat/chat?message=${encodeURIComponent(text)}`, {
+        const res = await fetch(ROUTES.CHAT_MESSAGE(text), {
             method: 'POST',
-            headers: {
-                'user_id': userId,
-                'Content-Type': 'application/json'
-            }
+            headers: AUTH_HEADERS()
         });
 
         const data = await res.json();
@@ -285,17 +277,4 @@ function autoResize(el) {
 // RESTORE SESSION ON PAGE LOAD
 // =====================================================
 
-window.addEventListener('DOMContentLoaded', () => {
-    const savedId = sessionStorage.getItem('agentUserId');
-    if (savedId) {
-        userId = savedId;
-        // Note: file upload state is not persisted (by design – one file per session means a fresh upload on restore)
-        uploadedFile = false;
-        isConnected = true;
-        setConnectedState();
-        // Remove the welcome message for restored sessions
-        const msgs = document.getElementById('messagesContainer');
-        msgs.innerHTML = '';
-        appendMessage('assistant', '🔄 Session restored. Upload a document and start chatting!');
-    }
-});
+// No session restore needed – getUserId() always returns the same server-injected APP_USER_ID

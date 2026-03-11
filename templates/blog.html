@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Bloggig - AI Blog Writing Agent{% endblock %}
+
+{% block styles %}
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+/>
+<link rel="stylesheet" href="/static/blog.css" />
+<style>
+  :root {
+    --bg-dark: #0f1117;
+    --sidebar-bg: #161922;
+    --accent: #6366f1;
+    --accent-hover: #4f46e5;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --border: rgba(255, 255, 255, 0.1);
+    --card-bg: #1e293b;
+  }
+
+  /* Specific styles moved to blog.css for cleaner template */
+</style>
+{% endblock %}
+
+{% block content %}
+<aside>
+  <div class="logo" >
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
+    Bloggig
+  </div>
+  <button class="new-chat-btn" onclick="startNewBlog()">
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+    New Blog
+  </button>
+  <div class="history-list" id="history-container">
+    <!-- Blogs will be loaded here -->
+  </div>
+</aside>
+
+<main class="blog-main-content">
+  <header class="blog-internal-header">
+    <div id="blog-title-display" style="font-weight: 600">
+      Blog Overview
+    </div>
+    <div class="blog-actions">
+      <button
+        class="btn-icon"
+        id="download-btn"
+        onclick="downloadCurrentBlog()"
+        disabled
+      >
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+        Download
+      </button>
+      <button
+        class="btn-icon btn-delete"
+        id="delete-btn"
+        onclick="deleteCurrentBlog()"
+        disabled
+      >
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="3 6 5 6 21 6" />
+          <path
+            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+          />
+          <line x1="10" y1="11" x2="10" y2="17" />
+          <line x1="14" y1="11" x2="14" y2="17" />
+        </svg>
+        Delete
+      </button>
+    </div>
+  </header>
+
+  <div id="content-area">
+    <div class="welcome-screen" id="welcome-screen">
+      <h1>Craft something amazing.</h1>
+      <p>
+        Welcome to Bloggig. Enter a topic below to start generating a
+        high-quality, research-backed blog post with AI-generated visuals.
+      </p>
+    </div>
+
+    <div id="pipeline-status"></div>
+    <div class="markdown-body" id="blog-content"></div>
+  </div>
+
+  <div class="input-container">
+    <div class="input-wrapper">
+      <input
+        type="text"
+        id="topic-input"
+        placeholder="Enter blog topic..."
+        onkeypress="if (event.key === 'Enter') startGeneration();"
+      />
+      <button
+        class="send-btn"
+        id="generate-btn"
+        onclick="startGeneration()"
+      >
+        <svg
+          id="send-icon"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="22" y1="2" x2="11" y2="13" />
+          <polyline points="22 2 15 22 11 13 2 9 22 2" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="/static/blog.js"></script>
+{% endblock %}
+
