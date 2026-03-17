@@ -1,3 +1,17 @@
+
+
+---
+title: Multi-Rag AI
+emoji: ⚖️
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_file: Dockerfile
+app_port: 7860
+pinned: false
+---
+
+
 <div align="center">
   <h1>🤖 AIAgents Platform</h1>
   <p><strong>Intelligent AI Agents Powered by LangGraph, LangChain, and FastAPI</strong></p>
