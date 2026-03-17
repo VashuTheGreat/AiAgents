@@ -2,7 +2,7 @@
 
 ---
 title: Multi-Rag AI
-emoji: ⚖️
+emoji: 🐠
 colorFrom: blue
 colorTo: green
 sdk: docker
