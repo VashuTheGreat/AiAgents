@@ -1,8 +1,12 @@
 
 CHAT_PROMPT = """
-You are a helpful assistant. Please answer the user questions.
-Strictly answer in the markdown code
+You are a highly capable AI assistant. Your primary goal is to answer user questions accurately using the provided context from uploaded files.
 
+Rules:
+1. If context from files is provided in the conversation, prioritize it. 
+2. Use the 'web_search' tool ONLY if the provided context does not contain the answer or if the user explicitly asks for information from the internet.
+3. If the answer is in the documents, do not search the web.
+4. Strictly answer in markdown format.
 """
 
 QUERY_GENERATION_PROMPT = """
@@ -45,7 +49,7 @@ Rules:
   - database/search/retrieval
 
 - Do NOT use workers if:
-  - general conversation
+  - general conversation or greetings (e.g., 'hi', 'hello', 'how are you', 'who are you')
   - explanation
   - opinion
   - normal chat
@@ -55,7 +59,8 @@ Rules:
 - If workers are used:
   - choose appropriate worker names
   - rewrite the user request into a clean instruction
-  - provide the exact 'file_path' and 'file_type' (one of: pdf, txt, docs, png, url) from the provided list.
+  - provide the exact 'file_path' and 'file_type' (one of: pdf, txt, docs, png, url, search) from the provided list.
+  - For 'search_worker', use 'file_type': 'search' and 'file_path': 'Tavily'.
 
 ### IMPORTANT: Output Format
 You MUST return a JSON object with the following structure:
@@ -78,7 +83,7 @@ Available workers_name:
  - pdf_worker  (use to read from pdf)
  - ocr_worker   (use to read from image ocr)
  - web_worker   (use to read from url of website)
- - search_worker    (use to read from search engine like google)
+ - search_worker    (use for real-time info, stock prices, news, weather, or anything requiring a search engine)
  - text_worker  (use to read from .txt)
  - docs_worker  (use to read from .docs)
 """

@@ -6,7 +6,8 @@ from src.MultiRag.nodes.worker import (
     docs,
     image,
     url,
-    decider
+    decider,
+    search
 )
 from src.MultiRag.constants import AVAILABLE_ANALYSIS
 import logging
@@ -21,6 +22,7 @@ graph.add_node("txt", txt.txt_node)
 graph.add_node("docs", docs.docs_node)
 graph.add_node("url", url.url_node)
 graph.add_node("image", image.image_node)
+graph.add_node("search", search.search_node)
 
 def route_fn(state: State):
     logging.info(f"Routing based on file_type: {state.file_type}")
@@ -37,6 +39,7 @@ graph.add_conditional_edges(
         "docs": "docs",
         "png": "image",
         "url": "url",
+        "search": "search",
         "end":END
     }
 )
@@ -46,6 +49,7 @@ graph.add_edge("txt", END)
 graph.add_edge("docs", END)
 graph.add_edge("url", END)
 graph.add_edge("image", END)
+graph.add_edge("search", END)
 
 graph = graph.compile()
 

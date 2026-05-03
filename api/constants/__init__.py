@@ -1,3 +1,8 @@
 DATA_FOLDER_PATH="api/public"
 CONTENT_PERSISTENT_TIME=5
 DB_FOLDER_PATH="db"
+
+AVAILABLE_ANALYSIS=['pdf','txt','docs','docx','png','url']
+
+USER_CONTENT_FILE_NAME="USER_CONTENT.yml"
+

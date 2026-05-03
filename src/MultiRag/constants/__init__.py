@@ -19,7 +19,7 @@ DB_FOLDER_PATH="db"
 
 
 
-AVAILABLE_ANALYSIS=['pdf','txt','docs','docx','png','url']
+AVAILABLE_ANALYSIS=['pdf','txt','docs','docx','png','url', 'search']
 
 
 

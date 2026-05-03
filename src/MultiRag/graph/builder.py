@@ -124,6 +124,10 @@ except Exception as e:
 
 logging.info("Graph compiled successfully.")
 
+
+
+
+
 async def deleteThread(thread_id: str):
     try:
         cp = memory
@@ -138,3 +142,26 @@ async def deleteThread(thread_id: str):
     except Exception as e:
         logging.error(f"Error deleting thread {thread_id}: {e}")
         return False
+
+
+
+async def retrieve_all_threads():
+    try:
+        cp=memory
+        all_threads = set()
+        for checkpoint in cp.list(None):
+            all_threads.add(checkpoint.config["configurable"]["thread_id"])
+        return list(all_threads)
+    except Exception as e:
+        logging.error(f"Error retrieving threads: {e}")
+        return []
+
+
+
+async def load_conversation(thread_id):
+    try:
+        state = graph.get_state(config={'configurable': {'thread_id': thread_id}})
+        return state.values.get('messages', [])
+    except Exception as e:
+        logging.error(f"Error loading conversation: {e}")
+        return []

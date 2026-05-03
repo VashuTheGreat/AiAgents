@@ -21,5 +21,5 @@ async def image_to_text(image_path:str)->str:
         return generated_text
     
     except Exception as e:
-        MyException(f"Error in image_to_text: {str(e)}",sys)
+        raise MyException(f"Error in image_to_text: {str(e)}")
 

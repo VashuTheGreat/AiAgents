@@ -18,23 +18,34 @@ embedding_model = CompatibleEmbeddings(model=EMBEDDING_MODEL)
 # ---------------- Document Fetcher ----------------
 @asyncHandler
 async def document_fetcher(docs: str = "data"):
-    logging.info(f"Fetching docs from {docs}")
+    # 1. Handle URL case
+    if docs.startswith("http://") or docs.startswith("https://"):
+        logging.info(f"Detected URL: {docs}. Loading via WebBaseLoader...")
+        from langchain_community.document_loaders import WebBaseLoader
+        try:
+            loader = WebBaseLoader(docs)
+            return loader.load()
+        except Exception as e:
+            logging.error(f"Failed to load URL {docs}: {e}")
+            return []
 
+    # 2. Handle Local File/Dir case
     if not os.path.exists(docs):
-        logging.error(f"Docs folder not found at: {docs}")
-        raise FileNotFoundError(f"Docs folder not found at: {docs}")
+        logging.error(f"Docs path not found: {docs}")
+        return [] # Return empty instead of raising to prevent crash
 
     if os.path.isfile(docs):
         files = [os.path.basename(docs)]
-        docs = os.path.dirname(docs) or "."
+        docs_dir = os.path.dirname(docs) or "."
     else:
         files = os.listdir(docs)
+        docs_dir = docs
 
     from langchain_community.document_loaders import TextLoader, PyPDFLoader
 
     documents = []
     for file in files:
-        file_path = os.path.join(docs, file)
+        file_path = os.path.join(docs_dir, file)
         ext = file.split(".")[-1].lower()
 
         try:
@@ -52,12 +63,32 @@ async def document_fetcher(docs: str = "data"):
                 documents.extend(loader.load())
 
             elif ext in ["png", "jpg", "jpeg"]:
-                from langchain_community.document_loaders import UnstructuredImageLoader
-                loader = UnstructuredImageLoader(file_path)
-                documents.extend(loader.load())
+                import easyocr
+                from langchain_core.documents import Document
+                from src.MultiRag.utils.image_embedding import image_to_text
+                
+                logging.info(f"Processing image {file} with EasyOCR and BLIP...")
+                
+                # 1. Word-to-word transcript
+                reader = easyocr.Reader(['en'], gpu=False)
+                ocr_results = reader.readtext(file_path)
+                transcript = " ".join([res[1] for res in ocr_results])
+                
+                # 2. Image caption
+                caption = await image_to_text(file_path)
+                
+                logging.info(f"Image processed. Transcript length: {len(transcript)}")
+                documents.append(Document(
+                    page_content=f"IMAGE TRANSCRIPT: {transcript}\n\nIMAGE DESCRIPTION: {caption}",
+                    metadata={"source": file_path}
+                ))
 
         except Exception as e:
             logging.error(f"Failed to load {file_path}: {e}")
+            if ext in ["png", "jpg", "jpeg"]:
+                from langchain_core.documents import Document
+                logging.info(f"Using fallback for image: {file_path}")
+                documents.append(Document(page_content=f"Image file: {file}\nNote: Word-to-word extraction failed.", metadata={"source": file_path}))
 
     return documents
 
@@ -76,11 +107,14 @@ async def chunking_documents(documents, chunk_size: int = 200, chunk_overlap: in
 @asyncHandler
 async def create_vector_store(path: str = "db", docs: str = "data"):
 
-    if os.path.exists(path):
-        logging.info("Existing FAISS DB found. Loading...")
-        vectorstore = FAISS.load_local(path, embedding_model, allow_dangerous_deserialization=True)
-        return vectorstore
-
+    if os.path.exists(path) and os.path.exists(os.path.join(path, "index.faiss")):
+        try:
+            logging.info("Existing FAISS DB found. Loading...")
+            vectorstore = FAISS.load_local(path, embedding_model, allow_dangerous_deserialization=True)
+            return vectorstore
+        except Exception as e:
+            logging.warning(f"Failed to load existing FAISS DB: {e}. Creating new one.")
+    
     logging.info("Creating new FAISS DB...")
     documents = await document_fetcher(docs=docs)
     if not documents:

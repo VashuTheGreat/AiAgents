@@ -1,76 +1,123 @@
-from accelerate import logging
 import fastapi
 from fastapi import UploadFile, Request, BackgroundTasks
 import os
-import shutil
-import asyncio
 import logging
 from src.MultiRag.graph.builder import deleteThread
 from utils.asyncHandler import asyncHandler
-from src.MultiRag.nodes.retreiver_check_node import clear_cached_retriever
+from utils.main_utils import write_yaml, load_yaml
+from src.MultiRag.models.rag_model import Content
+from src.MultiRag.components.content_embedder import ContentEmbedder
+from src.MultiRag.entity.config_entity import ContentEmbedderConfig
+from api.constants import DATA_FOLDER_PATH, USER_CONTENT_FILE_NAME
+from src.MultiRag.graph.builder import graph
+from langchain_core.messages import HumanMessage
 
-from api.constants import CONTENT_PERSISTENT_TIME,DATA_FOLDER_PATH,DB_FOLDER_PATH
 router = fastapi.APIRouter()
 
-
-@asyncHandler
-async def delete_folder_after_time(user_id):
-
-    await asyncio.sleep(CONTENT_PERSISTENT_TIME)
-
-    folder_path = f"{DATA_FOLDER_PATH}/{user_id}"
-    db_path = f"{DB_FOLDER_PATH}/{user_id}"
-
-    # Step 1: null refs, gc.collect(), clear_system_cache() — in that order
-    clear_cached_retriever(db_path)
-    await deleteThread(user_id)
-
-    # Step 2: give Windows 3s to fully release OS-level file locks after GC
-    await asyncio.sleep(3)
-
-    if os.path.exists(folder_path):
-        shutil.rmtree(folder_path)
-        logging.info(f"Folder deleted: {folder_path}")
-
-    if os.path.exists(db_path):
-        for attempt in range(6):
-            try:
-                shutil.rmtree(db_path)
-                logging.info(f"DB deleted: {db_path}")
-                return
-            except PermissionError as e:
-                logging.warning(f"DB delete attempt {attempt+1} failed: {e}")
-                await asyncio.sleep(3)
-
-        logging.error(f"Failed to delete DB after all retries: {db_path}")
-
-
-
+async def generate_retreivers(thread_id: str):
+    yaml_path = f"{DATA_FOLDER_PATH}/{thread_id}/{USER_CONTENT_FILE_NAME}"
+    yaml_content = load_yaml(yaml_path)
     
+    if not yaml_content or 'Contents' not in yaml_content:
+        logging.warning(f"No contents found in {yaml_path}")
+        return
 
+    for content_dict in yaml_content['Contents']:
+        name = content_dict.get("name")
+        path = content_dict.get("path")
+        
+        logging.info(f"Processing content: {name}")
+    
+        content_embedder_config = ContentEmbedderConfig(
+            file_path=path,
+            vector_store_path=f"db/{thread_id}/{name}",
+        )
+        component = ContentEmbedder(content_embedder_config=content_embedder_config)
+        retreiver = await component.embed_content()
+        logging.info(f"Generated retreiver for {name}: {retreiver}")
 
-@router.post("/post_content")
+@router.post("/")
 async def post_content(
     req: Request,
-    file: UploadFile,
-    background_tasks: BackgroundTasks
+    file: UploadFile
 ):
     try:
         user_id = req.headers.get("user_id")
+        thread_id = req.headers.get("thread_id") or user_id
+        if not user_id:
+            return {"message": "User ID missing in headers"}
 
-        folder = f"{DATA_FOLDER_PATH}/{user_id}"
+        folder = f"{DATA_FOLDER_PATH}/{thread_id}"
         os.makedirs(folder, exist_ok=True)
 
-        file_path = f"{folder}/{file.filename}"
-
-        with open(file_path, "wb") as f:
+        saved_file_path = f"{folder}/{file.filename}"
+        with open(saved_file_path, "wb") as f:
             f.write(await file.read())
 
-        # start background delete timer
-        # background_tasks.add_task(delete_folder_after_time, user_id)
+        yaml_path = f"{folder}/{USER_CONTENT_FILE_NAME}"
+        
+        content_entry = {
+            "name": file.filename,
+            "about": file.filename,
+            "path": saved_file_path
+        }
 
-        logging.info(f"File uploaded succesfully file_path:{file_path}")
+        # Append to YAML
+        write_yaml(yaml_path, {"Contents": [content_entry]}, mode="a")
+        
+        logging.info(f"File uploaded and entry added to YAML: {file.filename}")
+
+        # Trigger retriever generation
+        await generate_retreivers(thread_id)
+
+        # Notify the AI about the upload in the thread history
+        config = {"configurable": {"thread_id": thread_id}}
+        notification = HumanMessage(content=f"[SYSTEM NOTIFICATION]: User has uploaded a new file: {file.filename}. Please keep this in mind for future queries.")
+        await graph.aupdate_state(config, {"messages": [notification]})
+
         return {"message": "File uploaded successfully"}
 
     except Exception as e:
-        return {"message": "File upload failed"}
+        logging.error(f"File upload failed: {e}")
+        return {"message": f"File upload failed: {str(e)}"}
+
+@router.post("/upload_url")
+async def upload_url(req: Request, url: str):
+    try:
+        user_id = req.headers.get("user_id")
+        thread_id = req.headers.get("thread_id") or user_id
+        if not user_id:
+            return {"message": "User ID missing in headers"}
+
+        folder = f"{DATA_FOLDER_PATH}/{thread_id}"
+        os.makedirs(folder, exist_ok=True)
+
+        yaml_path = f"{folder}/{USER_CONTENT_FILE_NAME}"
+        
+        # Use a truncated URL for the name
+        display_name = (url[:50] + '...') if len(url) > 50 else url
+        
+        content_entry = {
+            "name": display_name,
+            "about": url,
+            "path": url
+        }
+
+        # Append to YAML
+        write_yaml(yaml_path, {"Contents": [content_entry]}, mode="a")
+        
+        logging.info(f"URL entry added to YAML: {url}")
+
+        # Trigger retriever generation (if the embedder supports URLs)
+        await generate_retreivers(thread_id)
+
+        # Notify the AI about the URL upload
+        config = {"configurable": {"thread_id": thread_id}}
+        notification = HumanMessage(content=f"[SYSTEM NOTIFICATION]: User has uploaded a new URL: {url}. Please keep this in mind for future queries.")
+        await graph.aupdate_state(config, {"messages": [notification]})
+
+        return {"message": "URL uploaded successfully"}
+
+    except Exception as e:
+        logging.error(f"URL upload failed: {e}")
+        return {"message": f"URL upload failed: {str(e)}"}
