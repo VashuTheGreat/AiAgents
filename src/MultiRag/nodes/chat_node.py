@@ -18,7 +18,6 @@ async def chat_node(state: State):
     tool_limit_hit = state.get("jump_to") == "end"
     has_context = len(state.get("worker_result", [])) > 0 or len(state.get("evidence", [])) > 0
 
-    # Simple greeting check to prevent over-eager tool calls
     is_greeting = False
     if not has_context and len(state.get('messages', [])) > 0:
         last_human_msg = state.get('messages')[-1].content.lower()
@@ -40,7 +39,6 @@ async def chat_node(state: State):
         SystemMessage(content=CHAT_PROMPT + "\nIMPORTANT: Do NOT write JSON tool calls manually. If you want to use a tool, use the native tool-calling function. If you are just chatting or greeting, respond only in plain, friendly Markdown text.")
     ] + state.get('messages', [])
     
-    # Log last message for debugging
     if prompt:
         last_msg = prompt[-1]
         logging.info(f"Last message in prompt: {last_msg.content[:200]}...")

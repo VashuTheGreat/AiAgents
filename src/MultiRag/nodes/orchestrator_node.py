@@ -35,7 +35,6 @@ async def orchestrator_node(state:State):
         import json
         import re
         
-        # Extract JSON from potential markdown blocks or raw text
         content = raw_res.content
         logging.info(f"Raw orchestrator response: {content}")
         
@@ -49,12 +48,8 @@ async def orchestrator_node(state:State):
                 logging.error(f"Manual JSON parsing failed: {e}")
         else:
             logging.warning("No JSON block found in orchestrator response. Attempting to construct plan from text...")
-            # Fallback: if it's not JSON, maybe it's just text. 
-            # We'll default to use_worker=False if we can't be sure, 
-            # or try to extract info if it looks like a task.
             if "worker" in content.lower() and "docs/" in content:
                 logging.info("Detected worker mention in text, but couldn't parse JSON. This model might need a better prompt.")
-                # We could try to extract more, but for now let's just log it.
 
     logging.info(f"Final plan decided: {response}")
     return {"plan": response}
