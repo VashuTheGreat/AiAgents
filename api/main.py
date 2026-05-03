@@ -1,9 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from api.MultiRag.routes import chat_route, uploader_route, pages_route
-from api.Web.routes import web_talk_routes
-from api.Blog.routes import page_route_blog,blog_router
-from api.Web.routes import page_route_web
+from api.MultiRag.routes import chat_route, uploader_route, pages_route,get_all_thread_route,load_conversation_route,get_available_file_fomates_route, delete_thread_route
 app = FastAPI()
 
 @app.middleware("http")
@@ -34,22 +31,25 @@ async def check_user_id(request: Request, call_next):
     return response
 
 app.include_router(pages_route.router)
-app.include_router(prefix="/chat", router=chat_route.router)
-app.include_router(prefix="/uploader", router=uploader_route.router)
+app.include_router(prefix="/api/v1/chat", router=chat_route.router)
+app.include_router(prefix="/api/v1/uploader", router=uploader_route.router)
+app.include_router(prefix="/api/v1/thread", router=get_all_thread_route.router)
+app.include_router(prefix="/api/v1/thread", router=delete_thread_route.router)
+app.include_router(prefix="/api/v1/conversation", router=load_conversation_route.router)
+app.include_router(prefix="/api/v1/file_formats", router=get_available_file_fomates_route.router)
+
+
+
+
+# # -------------------- Web -------------------------------
+# app.include_router(page_route_web.router)
+# app.include_router(prefix="/web",router=web_talk_routes.router)
 
 
 
 
 
-# -------------------- Web -------------------------------
-app.include_router(page_route_web.router)
-app.include_router(prefix="/web",router=web_talk_routes.router)
-
-
-
-
-
-# ------------ Blog --------------------
-app.include_router(page_route_blog.router)
-app.include_router(prefix="/blog",router=blog_router.router)
+# # ------------ Blog --------------------
+# app.include_router(page_route_blog.router)
+# app.include_router(prefix="/blog",router=blog_router.router)
 

@@ -1,134 +1,128 @@
 
-
----
-title: Multi-Rag AI
-emoji: 🐠
-colorFrom: blue
-colorTo: green
-sdk: docker
-app_file: Dockerfile
-app_port: 7860
-pinned: false
----
-
-
 <div align="center">
-  <h1>🤖 AIAgents Platform</h1>
-  <p><strong>Intelligent AI Agents Powered by LangGraph, LangChain, and FastAPI</strong></p>
+  <h1>🚀 Multi-RAG AI Pipeline</h1>
+  <p><strong>Advanced Multi-Agent RAG Orchestration powered by LangGraph, AWS Bedrock, and FAISS</strong></p>
+
+  [![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/)
+  [![LangGraph](https://img.shields.io/badge/Framework-LangGraph-orange.svg)](https://github.com/langchain-ai/langgraph)
+  [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-green.svg)](https://fastapi.tiangolo.com/)
+  [![FAISS](https://img.shields.io/badge/VectorDB-FAISS-red.svg)](https://github.com/facebookresearch/faiss)
 </div>
 
-<br />
+---
 
-Welcome to **AIAgents**, a full-stack, state-of-the-art framework for building and deploying extremely scalable, multi-agent AI ecosystems! Featuring powerful autonomous agents for complex Web Research, Blog Generation, Document RAG functionality, and interactive multi-turn chatting!
+## 📖 Overview
+
+**Multi-RAG AI** is a state-of-the-art, multi-agent RAG (Retrieval-Augmented Generation) pipeline designed for high-performance document intelligence. It leverages **LangGraph** for sophisticated orchestration, allowing an autonomous "Orchestrator" agent to decide which specialized workers (PDF, DOCX, TXT, Images, Web Search) are needed to answer complex user queries.
+
+### Why Multi-RAG?
+- **Intelligent Fan-out**: The orchestrator can trigger multiple workers in parallel to gather information from different sources.
+- **Dynamic Routing**: Automatically detects file types and routes tasks to specialized loaders.
+- **OCR Integration**: Built-in support for image processing and optical character recognition.
+- **Web Search Fallback**: If local documents are insufficient, the agents can autonomously search the live web.
 
 ---
 
-## 🚀 Features
+## 🏗️ Architecture
 
-- **✍️ Bloggig (Blog Agent)**: Powerful autonomous agent that researches, writes, and generates high-quality blog posts complete with AI-generated visuals.
-- **🌐 Web Research Agent**: Automatically browse, scrape, and synthesize live internet data straight from any URL (including YouTube videos!) directly within the web interface.
-- **📚 Multi-turn RAG Chat**: Chat with arbitrary text or PDF documents using deep LangGraph memory, powerful sentence transformers for vector retrieval, and advanced orchestration logic.
-- **🎨 Stunning UI**: Beautiful, fully-responsive, custom Dark Mode interface crafted natively with Jinja2 Templating, vanilla HTML/CSS/JS, and glassmorphism UI elements.
-- **⚡ Supercharged Backend**: High-performance asynchronous API crafted using FastAPI.
-- **🛠️ Extensible AI Architecture**: Built on top of the robust **LangChain** and **LangGraph** Python ecosystem to allow autonomous scaling of multi-agent workflows.
+The system is built as a nested graph structure, providing a clean separation between high-level orchestration and low-level specialized tasks.
+
+### 1. Main Orchestration Graph
+The main graph handles the interaction between the user, the orchestrator, and the final chat response.
+
+![Main Graph Architecture](./graph.png)
+
+### 2. Worker Sub-Graph
+The worker sub-graph is responsible for specialized information retrieval from various file formats.
+
+![Worker Sub-Graph](./worker_sub_graph.png)
+
+---
+
+## ✨ Key Features
+
+- **📂 Multi-Format Support**:
+  - **PDF**: Deep document parsing.
+  - **DOCX**: Microsoft Word document integration.
+  - **TXT**: Plain text analysis.
+  - **Images (OCR)**: Extraction of text from PNG/JPG using specialized loaders.
+- **🤖 Autonomous Orchestration**: Uses a Llama-3.3-70B model on **AWS Bedrock** with a manual JSON fallback mechanism for 100% reliable structured output.
+- **🔍 Hybrid Retrieval**: Combines local FAISS vector stores with real-time Google Search integration.
+- **🧠 Persistence & Memory**: Full multi-turn conversation support with LangGraph checkpointers.
+- **⚡ Modern Tech Stack**: Built with `uv` for lightning-fast dependency management and `FastAPI` for a high-performance backend.
+
+---
 
 ## 🛠️ Tech Stack
 
-- **Backend**: Python 3.12+, FastAPI, Uvicorn
-- **AI Frameworks**: LangChain, LangGraph, Sentence-Transformers, HuggingFace
-- **LLMs**: AWS Bedrock (Claude 3.5 Sonnet, Claude 3 Haiku, Llama 3), OpenAI (GPT-4o)
-- **Vector Database**: FAISS (Facebook AI Similarity Search)
-- **Frontend**: Jinja2 Templates, Vanilla JS, CSS3, DOM manipulation
-- **Development Tooling**: `uv` (Fast Python Package Manager)
+- **Core**: [Python 3.12](https://www.python.org/)
+- **Orchestration**: [LangGraph](https://github.com/langchain-ai/langgraph) & [LangChain](https://github.com/langchain-ai/langchain)
+- **Large Language Models**: [AWS Bedrock](https://aws.amazon.com/bedrock/) (Llama 3.3 70B)
+- **Vector Storage**: [FAISS](https://github.com/facebookresearch/faiss)
+- **Embeddings**: [HuggingFace](https://huggingface.co/) (all-MiniLM-L6-v2)
+- **Backend API**: [FastAPI](https://fastapi.tiangolo.com/)
+- **Package Management**: [uv](https://github.com/astral-sh/uv)
 
 ---
 
-## ⚙️ Quickstart
+## 🚀 Getting Started
 
 ### Prerequisites
-
-- Ensure you have **Python >= 3.12** installed on your system.
-- Make sure you are using [uv](https://github.com/astral-sh/uv) to manage project dependencies!
+- Python 3.12+
+- `uv` installed (`pip install uv`)
+- AWS Credentials (for Bedrock access)
 
 ### 1. Installation
-
-1. **Clone the repository**:
 ```bash
-git clone https://github.com/VashuTheGreat/AiAgents.git
-cd AiAgents
-```
+# Clone the repository
+git clone https://github.com/VashuTheGreat/Multi-Rag.git
+cd Multi-Rag
 
-2. **Set up the virtual environment & install dependencies** using `uv`:
-```bash
+# Install dependencies
 uv sync
 ```
 
-### 2. Environment Variables
-
-Create a `.env` file in the root of the project and place your necessary API keys inside.
-
+### 2. Environment Setup
+Create a `.env` file in the root directory:
 ```env
-# General
-APP_API_KEY="your_custom_auth_key"
+# AWS Bedrock Config
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_REGION_NAME=us-east-1
 
-# AWS Bedrock (For Blog Agent)
-AWS_ACCESS_KEY_ID="your_key"
-AWS_SECRET_ACCESS_KEY="your_secret"
-AWS_REGION_NAME="us-east-1"
-
-# OpenAI
-OPENAI_API_KEY="sk-..."
+# Tooling (e.g., Search API keys if applicable)
+# ...
 ```
 
-### 3. Run the Server
-
-Simply launch the FastAPI application:
+### 3. Run the Application
 ```bash
-uv run .\main.py
+# Start the FastAPI server
+uv run main.py
 ```
-This will start the development server. Navigate to `http://127.0.0.1:8000/` to see the AIAgents Hub!
-
----
-
-## 🎨 Walkthrough of the Application
-
-### 🏠 Home Page (`/`)
-An elegant gateway into the available AI agent interfaces.
-
-### ✍️ Blog Agent (`/blog`)
-The flagship feature. Enter a topic, and Bloggig will autonomously research the subject, plan its structure, write the content in Markdown, and generate relevant images. It features a real-time "pipeline console" to track the agent's progress.
-
-### 🌐 Web Summarizer (`/web`)
-Paste any URL or YouTube Link to extract and summarize content using our custom LangGraph architecture.
-
-### 💬 Chat MultiGraph (`/chat`)
-Engage with your locally uploaded documents via RAG (Retrieval-Augmented Generation) with intelligent memory buffers.
+Navigate to `http://127.0.0.1:8000` to start chatting with your documents!
 
 ---
 
 ## 📂 Project Structure
 
 ```bash
-AiAgents/
-├─ api/
-│  ├─ Blog/           # Bloggig-specific routers and models
-│  ├─ MultiRag/       # Document RAG routers
-│  └─ Web/            # Web Summarizer routers
-├─ src/
-│  ├─ Blog/           # Bloggig Agent logic (Graph, Nodes, Prompts)
-│  ├─ MultiRag/       # RAG Agent logic (Retrievers, Vectorstores, etc.)
-│  └─ Web/            # Web Agent logic (Loaders, Graph)
-├─ images/            # Generated blog visualizations
-├─ results/           # Saved blog markdown outputs
-├─ static/            # CSS, JS, and local frontend assets
-├─ templates/         # Jinja2 HTML templates
-├─ data/              # Raw document storage for RAG
-├─ db/                # Local FAISS vector database storage
-└─ pyproject.toml     # Project dependencies (uv)
+Multi-Rag/
+├── api/                # FastAPI Endpoints & Controllers
+├── src/
+│   └── MultiRag/
+│       ├── components/ # Core graph runners & embedders
+│       ├── graph/      # LangGraph definitions (Main & Worker)
+│       ├── models/     # Pydantic state & output schemas
+│       ├── nodes/      # Individual graph node implementations
+│       ├── prompts/    # LLM system prompts
+│       └── utils/      # Ingestion & document processing utilities
+├── static/             # Frontend assets (CSS, JS)
+├── templates/          # Jinja2 HTML templates
+└── db/                 # Local FAISS index persistence
 ```
 
 ---
 
 <div align="center">
-  <p>Crafted with ❤️ for professional creators.</p>
+  <p>Built with 💖 for the future of Agentic RAG.</p>
 </div>

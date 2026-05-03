@@ -29,11 +29,17 @@ function getUserId() {
  *         await fetch(ROUTES.X, { method:"POST", headers: AUTH_HEADERS({ Accept:"application/json" }), body:... })
  */
 function AUTH_HEADERS(extra = {}) {
-  return {
+  const headers = {
     "user_id": getUserId(),
     "Content-Type": "application/json",
     ...extra,
   };
+  
+  if (window.currentThreadId) {
+    headers["thread_id"] = window.currentThreadId;
+  }
+  
+  return headers;
 }
 
 // ── API Routes ────────────────────────────────────────────
@@ -45,8 +51,15 @@ const ROUTES = {
   BLOG:    "/blog",
 
   // ── MultiRAG / Chat ───────────────────────────────────
-  CHAT_MESSAGE:  (message) => `/chat/chat?message=${encodeURIComponent(message)}`,
-  UPLOAD_FILE:   "/uploader/post_content",
+  CHAT_MESSAGE:  (message) => `/api/v1/chat/chat?message=${encodeURIComponent(message)}`,
+  UPLOAD_FILE:   "/api/v1/uploader/",
+  UPLOAD_URL:    (url) => `/api/v1/uploader/upload_url?url=${encodeURIComponent(url)}`,
+  GET_FILE_FORMATS: "/api/v1/file_formats/",
+
+  // ── Threads ───────────────────────────────────────────
+  GET_ALL_THREADS: "/api/v1/thread/get_all_thread",
+  LOAD_CONVERSATION: (threadId) => `/api/v1/conversation/load_conversation?thread_id=${encodeURIComponent(threadId)}`,
+  DELETE_THREAD: (threadId) => `/api/v1/thread/delete_thread?thread_id=${encodeURIComponent(threadId)}`,
 
   // ── Web Summarizer ────────────────────────────────────
   WEB_SUMMARIZE: (url) => `/web/web_summerizer?url=${encodeURIComponent(url)}`,
