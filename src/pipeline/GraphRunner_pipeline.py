@@ -1,0 +1,15 @@
+from utils.asyncHandler import asyncHandler
+from src.components.run_graph import RunGraph
+import logging
+
+class RunGraphPipeline:
+    def __init__(self):
+        pass
+    
+    @asyncHandler
+    async def run_graph(self, state: dict) -> dict:
+        logging.info("Running graph pipeline...")
+        runner = RunGraph()
+        response = await runner.run(state)
+        logging.info("Graph pipeline completed.")
+        return response

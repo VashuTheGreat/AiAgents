@@ -1,6 +1,5 @@
 import yaml
 import os
-import logging
 
 def load_yaml(file_path: str):
     if not os.path.exists(file_path):
@@ -25,3 +24,4 @@ def write_yaml(file_path: str, data: dict, mode: str = "w"):
             
     with open(file_path, "w") as f:
         yaml.dump(data, f)
+
